@@ -1,0 +1,25 @@
+{
+  "extends": [
+    "config:base",
+    "schedule:weekends",
+    ":disableDependencyDashboard"
+  ],
+  "rangeStrategy": "replace",
+  "lockFileMaintenance": {
+    "enabled": true,
+    "extends": ["schedule:weekends"]
+  },
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "extends": ["schedule:weekends"]
+  },
+  "assigneesFromCodeOwners": true,
+  "reviewersFromCodeOwners": true,
+  "groupName": "General Updates",
+  "automerge": true,
+  "major": {
+    "automerge": false,
+    "groupName": "Major Updates",
+    "extends": ["schedule:weekends"]
+  }
+}
