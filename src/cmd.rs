@@ -18,10 +18,10 @@ pub struct CmdArgs {
   pub weight: f64,
 
   /// The minimum price to end the ladder.
-  #[arg(short, long)]
+  #[arg()]
   pub low: f64,
 
   /// The maximum price to start the ladder.
-  #[arg(short = 'm', long)]
+  #[arg()]
   pub high: f64,
 }
