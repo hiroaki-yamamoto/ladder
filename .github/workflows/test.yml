@@ -1,0 +1,27 @@
+name: "Test"
+
+on:
+  push:
+    branches:
+      - '**/*'
+  pull_request:
+
+jobs:
+  check:
+    name: "Test"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y musl-tools curl lld clang cmake
+      - name: Setup Rust
+        run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+      - name: Target to x86_64-unknown-linux-musl
+        run: rustup target add x86_64-unknown-linux-musl
+      - name: Setup Rustfmt
+        run: rustup component add rustfmt
+      - name: "Test the package"
+        run: cargo test --target x86_64-unknown-linux-musl
