@@ -2,6 +2,7 @@ use ::std::iter::Iterator;
 
 use crate::entities::Ladder;
 
+#[derive(Debug, Clone)]
 pub struct LadderCalcSvc {
   low: f64,
   delta: f64,
@@ -23,6 +24,7 @@ impl LadderCalcSvc {
     let delta = ((delta + 0.005) * 100.0) as u128;
     let delta = delta as f64 / 100.0;
     let weight = weight.unwrap_or(1.0);
+    let (high, low) = if high > low { (high, low) } else { (low, high) };
     return Self {
       low,
       delta,
@@ -45,7 +47,8 @@ impl Iterator for LadderCalcSvc {
     let qty = ((self.bpt / price) + 0.5) as u64;
     // Budget per trade = BPT * weight^i = previous budget * weight
     self.bpt *= self.weight;
-    self.cur = Ladder::new(price - self.delta, qty);
+    self.cur.price = price - self.delta;
+    self.cur.qty = qty;
     return Some(Ladder::new(price, qty));
   }
 }
@@ -57,6 +60,20 @@ mod tests {
   #[test]
   fn test_calc_without_weight() {
     let svc = LadderCalcSvc::new(100.0, 90.0, 5, 1000.0, None);
+    let results = &[
+      Ladder::new(100.0, 10),
+      Ladder::new(97.5, 10),
+      Ladder::new(95.0, 11),
+      Ladder::new(92.5, 11),
+      Ladder::new(90.0, 11),
+    ];
+    let ladders: Vec<Ladder> = svc.into_iter().collect();
+    assert_eq!(ladders, results);
+  }
+
+  #[test]
+  fn test_calc_low_high() {
+    let svc = LadderCalcSvc::new(90.0, 100.0, 5, 1000.0, None);
     let results = &[
       Ladder::new(100.0, 10),
       Ladder::new(97.5, 10),

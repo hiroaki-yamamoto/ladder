@@ -1,6 +1,6 @@
 use ::std::string::ToString;
 
-#[derive(Debug, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct Ladder {
   pub price: f64,
   pub qty: u64,

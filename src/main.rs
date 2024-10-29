@@ -1,6 +1,11 @@
+mod cmd;
 mod entities;
 mod svcs;
 
+use ::clap::Parser;
+
+use crate::cmd::CmdArgs;
+
 fn main() {
-  println!("Hello, world!");
+  let args = CmdArgs::parse();
 }
