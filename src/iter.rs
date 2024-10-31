@@ -4,6 +4,7 @@ use crate::entities::Ladder;
 
 #[derive(Debug, Clone)]
 pub struct LadderCalcIter {
+  stop: bool,
   low: f64,
   delta: f64,
   bpt: f64,
@@ -24,6 +25,7 @@ impl LadderCalcIter {
     let weight = weight.unwrap_or(1.0);
     let (high, low) = if high > low { (high, low) } else { (low, high) };
     return Self {
+      stop: false,
       low,
       delta,
       bpt,
@@ -37,9 +39,15 @@ impl Iterator for LadderCalcIter {
   type Item = Ladder;
 
   fn next(&mut self) -> Option<Self::Item> {
-    if self.cur.price < self.low {
+    if self.stop {
       return None;
     }
+    if self.cur.price <= self.low {
+      self.stop = true;
+    }
+    // if self.cur.price < self.low {
+    //   return None;
+    // }
     let price = self.cur.price;
     // Unlike cryptos, stocks cannot be bought in fractions
     let qty = ((self.bpt / price) + 0.5) as u64;
@@ -59,8 +67,8 @@ mod tests {
   use super::*;
 
   #[test]
-  fn test_calc_without_weight() {
-    let svc = LadderCalcIter::new(100.0, 90.0, 5, 1000.0, None);
+  fn test_calc_param_reversed() {
+    let svc = LadderCalcIter::new(90.0, 100.0, 5, 1000.0, None);
     let results = &[
       Ladder::new(100.0, 10),
       Ladder::new(97.5, 10),
@@ -73,8 +81,8 @@ mod tests {
   }
 
   #[test]
-  fn test_calc_param_reversed() {
-    let svc = LadderCalcIter::new(90.0, 100.0, 5, 1000.0, None);
+  fn test_calc_without_weight() {
+    let svc = LadderCalcIter::new(100.0, 90.0, 5, 1000.0, None);
     let results = &[
       Ladder::new(100.0, 10),
       Ladder::new(97.5, 10),
@@ -95,6 +103,19 @@ mod tests {
       Ladder::new(95.0, 13),
       Ladder::new(92.5, 14),
       Ladder::new(90.0, 16),
+    ];
+    let ladders: Vec<Ladder> = svc.into_iter().collect();
+    assert_eq!(ladders, results);
+  }
+
+  #[test]
+  fn test_last_inclusion() {
+    let svc = LadderCalcIter::new(22.30, 33.66, 4, 1000.0, None);
+    let results = &[
+      Ladder::new(33.66, 30),
+      Ladder::new(29.87, 33),
+      Ladder::new(26.08, 38),
+      Ladder::new(22.29, 45),
     ];
     let ladders: Vec<Ladder> = svc.into_iter().collect();
     assert_eq!(ladders, results);
